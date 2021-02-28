@@ -19,7 +19,7 @@ if CCPORT is not None:
 BROKER = os.getenv('BROKER')
 BROKER_PORT = int(os.getenv('BROKER_PORT'))
 BROKER_CLIENT_ID = os.getenv('BROKER_CLIENT_ID')
-TOPIC = os.getenv('PORT')
+TOPIC = os.getenv('BROKER_TOPIC')
 if TOPIC is None:
 	TOPIC = '/logs/'
 
