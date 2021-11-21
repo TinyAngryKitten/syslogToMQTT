@@ -5,6 +5,7 @@ import paho.mqtt.client as mqtt
 import socket
 import logging
 import requests
+import re
 
 HOST = "0.0.0.0"
 PORT = os.getenv('PORT')
@@ -44,13 +45,27 @@ class SyslogUDPHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         data = bytes.decode(self.request[0].strip(), encoding="utf-8")
-        logging.info(str(data))
+
+        name = ""
+        message = ""
+        try:
+            search = re.search('<\\d+>\\w+ \\d+ \\d+:\\d+:\\d+ ([\\w_\\-.]+)', str(data))
+            name = search.group(1)
+            message = search.group(2)
+        except:
+            print("no data available")
+
+        msgJson= {
+            "message": message,
+            "service": name,
+            "data": str(data),
+            "host": self.client_address[0]
+        }
+
+        logging.info(msgJson)
 
         if HTTP_URL is not None:
-            requests.post(HTTP_URL, json={
-                "message": str(data),
-                "host": self.client_address[0]
-            })
+            requests.post(HTTP_URL, json=msgJson)
 
         # send copy of message to another server
         if CCHOST is not None:
