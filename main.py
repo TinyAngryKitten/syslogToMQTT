@@ -37,12 +37,6 @@ logging.basicConfig(level=logging.INFO, format='%(message)s', datefmt='', filena
 
 
 class SyslogUDPHandler(socketserver.BaseRequestHandler):
-    mqttClient = mqtt.Client(BROKER_CLIENT_ID, protocol=mqtt.MQTTv5)
-    try:
-        mqttClient.connect(BROKER, BROKER_PORT)
-    except:
-        logging.error("Unable to connect to mqttClient")
-
     def handle(self):
         data = bytes.decode(self.request[0].strip(), encoding="utf-8")
 
@@ -71,11 +65,6 @@ class SyslogUDPHandler(socketserver.BaseRequestHandler):
         if CCHOST is not None:
             socket.socket(socket.AF_INET, socket.SOCK_DGRAM) \
                 .sendto(self.request[0].strip(), (CCHOST, CCPORT))
-
-        if not self.mqttClient.is_connected():
-            self.mqttClient.reconnect()
-        self.mqttClient.publish(TOPIC + self.client_address[0], str(data))
-
 
 if __name__ == "__main__":
     logging.info("Starting...")
