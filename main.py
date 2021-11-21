@@ -37,7 +37,10 @@ logging.basicConfig(level=logging.INFO, format='%(message)s', datefmt='', filena
 
 class SyslogUDPHandler(socketserver.BaseRequestHandler):
     mqttClient = mqtt.Client(BROKER_CLIENT_ID, protocol=mqtt.MQTTv5)
-    mqttClient.connect(BROKER, BROKER_PORT)
+    try:
+        mqttClient.connect(BROKER, BROKER_PORT)
+    except:
+        logging.error("Unable to connect to mqttClient")
 
     def handle(self):
         data = bytes.decode(self.request[0].strip(), encoding="utf-8")
