@@ -4,6 +4,7 @@ import socketserver
 import paho.mqtt.client as mqtt
 import socket
 import logging
+import requests
 
 HOST = "0.0.0.0"
 PORT = os.getenv('PORT')
@@ -11,17 +12,23 @@ if PORT is None:
 	PORT = 514
 else: PORT = int(PORT)
 
+HTTP_URL = os.getenv('HTTP_URL')
+
 CCHOST = os.getenv('CCHOST')
 CCPORT = os.getenv('CCPORT')
 if CCPORT is not None:
 	CCPORT = int(CCPORT)
 
 BROKER = os.getenv('BROKER')
-BROKER_PORT = int(os.getenv('BROKER_PORT'))
+BROKER_PORT = int("1883" if os.getenv('BROKER_PORT') is None else os.getenv('BROKER_PORT'))
 BROKER_CLIENT_ID = os.getenv('BROKER_CLIENT_ID')
 TOPIC = os.getenv('BROKER_TOPIC')
 if TOPIC is None:
 	TOPIC = '/logs/'
+if BROKER is None:
+	BROKER = '192.168.50.3'
+if BROKER_CLIENT_ID is None:
+	BROKER_CLIENT_ID = "Syslog forwarding agent"
 
 LOG_FILE = 'logfile.log'
 logging.basicConfig(level=logging.INFO, format='%(message)s', datefmt='', filename=LOG_FILE, filemode='a')
@@ -33,6 +40,12 @@ class SyslogUDPHandler(socketserver.BaseRequestHandler):
 	def handle(self):
 		data = bytes.decode(self.request[0].strip(), encoding="utf-8")
 		logging.info(str(data))
+
+		if HTTP_URL is not None:
+			requests.post(HTTP_URL, json={
+				"message": str(data),
+				"host": self.client_address[0]
+			})
 
 		#send copy of message to another server
 		if CCHOST is not None:
