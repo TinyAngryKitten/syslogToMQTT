@@ -49,10 +49,12 @@ class SyslogUDPHandler(socketserver.BaseRequestHandler):
         except:
             print("no data available")
 
-        msgJson= {
+        msgJson = {
             "message": message,
             "service": name,
-            "data": str(data),
+            "host": self.client_address[0]
+        } if message is not "" and name is not "" else {
+            "message": str(data),
             "host": self.client_address[0]
         }
 
@@ -65,6 +67,7 @@ class SyslogUDPHandler(socketserver.BaseRequestHandler):
         if CCHOST is not None:
             socket.socket(socket.AF_INET, socket.SOCK_DGRAM) \
                 .sendto(self.request[0].strip(), (CCHOST, CCPORT))
+
 
 if __name__ == "__main__":
     logging.info("Starting...")
