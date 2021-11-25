@@ -50,11 +50,8 @@ class SyslogUDPHandler(socketserver.BaseRequestHandler):
             print("no data available")
 
         msgJson = {
-            "message": message,
+            "message": message if message is not "" and name is not "" else str(data),
             "service": name,
-            "host": self.client_address[0]
-        } if message is not "" and name is not "" else {
-            "message": str(data),
             "host": self.client_address[0]
         }
 
