@@ -58,7 +58,7 @@ class SyslogUDPHandler(socketserver.BaseRequestHandler):
         logging.info(msgJson)
 
         if HTTP_URL is not None:
-            requests.post(HTTP_URL, json=msgJson)
+            requests.post(HTTP_URL, json=msgJson).close()
 
         # send copy of message to another server
         if CCHOST is not None:
